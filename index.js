@@ -1,8 +1,8 @@
 const express = require("express");
 const { rateLimit } = require("express-rate-limit");
 require("dotenv").config();
+const { userRoutes } = require("./routes/user");
 const { logger } = require("./logger");
-const { level } = require("winston");
 const PORT = process.env.PORT || 3000;
 const basicLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -12,6 +12,7 @@ const basicLimiter = rateLimit({
 });
 const app = express();
 app.use(basicLimiter);
+app.use(express.json());
 app.use((req, res, next) => {
   logger.http("request recived", {
     url: req.originalUrl,
@@ -19,6 +20,8 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+app.use("/api/v1/users", userRoutes);
 app.get("/", (req, res, next) => {
   res.json({ data: "ok" });
 });
