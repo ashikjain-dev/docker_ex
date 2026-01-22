@@ -48,10 +48,52 @@ userRoutes.get("/", authenticate, async (req, res, next) => {
     });
   }
 });
-userRoutes.post("/signin", (req, res, next) => {
+userRoutes.post("/signin", validateSignIn, async (req, res, next) => {
   try {
     const { email, password } = req.body;
-  } catch (error) {}
+    const db = await getDB();
+    const encryptedEmail = encrypt(email);
+    const userInfo = await db
+      .collection("users")
+      .findOne({ email: encryptedEmail });
+    if (!userInfo) {
+      res.status(400).json({ data: "user data not found" });
+      logger.info("user data not found in the mongodb", {
+        email: email,
+      });
+      return;
+    }
+    const isPasswordMatch = await bcrypt.compare(password, userInfo.password);
+    if (!isPasswordMatch) {
+      res.status(403).json({ data: "email or password is incorrect." });
+      logger.info("password doesnot match", {
+        email: email,
+      });
+      return;
+    }
+    userInfo.email = decrypt(userInfo.email);
+    userInfo.firstName = decrypt(userInfo.firstName);
+    userInfo.lastName = decrypt(userInfo.lastName);
+    userInfo.age = decrypt(userInfo.age);
+    res.json({
+      data: {
+        id: userInfo._id,
+        email: userInfo.email,
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        age: userInfo.age,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ data: "something went wrong" });
+    logger.error("server error", {
+      statusCode: res.statusCode,
+      error: error.message,
+      stack: error.stack,
+      method: req.method,
+      url: req.originalUrl,
+    });
+  }
 });
 
 userRoutes.post("/signup", validateSignUp, async (req, res, next) => {

@@ -21,6 +21,7 @@ function encrypt(text) {
     logger.error(error.message, {
       fullDetails: error.stack,
     });
+    throw new Error(error);
   }
 }
 

@@ -1,20 +1,49 @@
 const validator = require("validator");
 const { logger } = require("../logger");
+const { getDB } = require("../config/mongo");
+const { encrypt, decrypt } = require("../utils/encryptdecrypt");
 /**
  * for signin : validate email
  * for signup : validate email,password(strong password),firstName,lastName and age
  */
-const validateSignIn = (req, res, next) => {};
+const validateSignIn = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).json({
+        data: "mandatory fields are: email and password",
+      });
+      return;
+    }
+    if (!validator.isEmail(email)) {
+      res.status(400).json({ data: "give proper email." });
+      return;
+    }
+    if (validator.isEmpty(password) || String(password).length < 8) {
+      res.status(400).json({
+        data: "password must not be empty or less than 8 characters",
+      });
+      return;
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ data: "something went wrong" });
+    logger.http("server error", {
+      statusCode: res.statusCode,
+      error: error,
+      method: req.method,
+      url: req.originalUrl,
+    });
+  }
+};
 
 const validateSignUp = (req, res, next) => {
   try {
     const { email, password, firstName, lastName, age } = req.body;
     if (!email || !password || !firstName || !age) {
-      res
-        .status(400)
-        .json({
-          data: "mandatory fields are: email, password, firstName and age.",
-        });
+      res.status(400).json({
+        data: "mandatory fields are: email, password, firstName and age.",
+      });
       return;
     }
     if (!validator.isEmail(email)) {
