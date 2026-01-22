@@ -3,6 +3,8 @@ const { rateLimit } = require("express-rate-limit");
 require("dotenv").config();
 const { userRoutes } = require("./routes/user");
 const { logger } = require("./logger");
+const { connectDB } = require("./config/mongo");
+const { error } = require("winston");
 const PORT = process.env.PORT || 3000;
 const basicLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -33,9 +35,17 @@ app.use("/", (req, res, next) => {
     statusCode: res.statusCode,
   });
 });
-app.listen(PORT, () => {
-  logger.info("server started", {
-    level: "info",
-    port: PORT,
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      logger.info("server started", {
+        level: "info",
+        port: PORT,
+      });
+    });
+  })
+  .catch((error) => {
+    logger.error(error.message, {
+      details: error.stack,
+    });
   });
-});

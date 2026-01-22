@@ -38,7 +38,7 @@ const validateSignUp = (req, res, next) => {
       logger.error("bad age value received", {
         statusCode: res.statusCode,
         details: res.data,
-        ageValue: req.body.age,
+        ageValue: age,
       });
       return;
     }
