@@ -9,8 +9,8 @@
 
 # User collection consists of:
 
-- Email,password,firstname,secondname and age.(all encrypted.)
+- Email,password(hashed),firstname,lastname and age.(all encrypted.)
 
 # Data collection consists of:
 
-- title,description,create at and tags.
+- title,description,created at and tags.

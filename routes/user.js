@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const { logger } = require("../logger");
 const { validateSignIn, validateSignUp } = require("../middlewares/validate");
 const { getDB } = require("../config/mongo");
@@ -23,9 +24,11 @@ userRoutes.post("/signup", validateSignUp, async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, age } = req.body;
     const db = await getDB();
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const resFromDB = await db.collection("users").insertOne({
       email: encrypt(email),
-      password,
+      password: hashedPassword,
       firstName: encrypt(firstName),
       lastName: encrypt(lastName),
       age: encrypt(age),
