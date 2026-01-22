@@ -9,10 +9,12 @@ const validateSignIn = (req, res, next) => {};
 const validateSignUp = (req, res, next) => {
   try {
     const { email, password, firstName, lastName, age } = req.body;
-    if (!email || !password || !firstName) {
+    if (!email || !password || !firstName || !age) {
       res
         .status(400)
-        .json({ data: "mandatory fields are: email,password and firstName." });
+        .json({
+          data: "mandatory fields are: email, password, firstName and age.",
+        });
       return;
     }
     if (!validator.isEmail(email)) {
@@ -49,10 +51,7 @@ const validateSignUp = (req, res, next) => {
       return;
     }
     if (!lastName) {
-      req.body.lastName = null;
-    }
-    if (!age) {
-      req.body.age = null;
+      req.body.lastName = "";
     }
     next();
   } catch (error) {

@@ -2,6 +2,7 @@ const express = require("express");
 const { logger } = require("../logger");
 const { validateSignIn, validateSignUp } = require("../middlewares/validate");
 const { getDB } = require("../config/mongo");
+const { encrypt, decrypt } = require("../utils/encryptdecrypt");
 const userRoutes = express.Router();
 /**
  * signin route takes email and password and generates json web token and add that to cookie and send back the response
@@ -22,10 +23,18 @@ userRoutes.post("/signup", validateSignUp, async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, age } = req.body;
     const db = await getDB();
-    await db
-      .collection("users")
-      .insertOne({ email, password, firstName, lastName, age });
-    res.status(201).json({ data: "created" });
+    const resFromDB = await db.collection("users").insertOne({
+      email: encrypt(email),
+      password,
+      firstName: encrypt(firstName),
+      lastName: encrypt(lastName),
+      age: encrypt(age),
+    });
+    res.status(201).json({ data: resFromDB });
+    logger.http("inserted to mongodb is successfull.", {
+      statusCode: res.statusCode,
+      info: resFromDB,
+    });
   } catch (error) {
     res.status(500).json({ data: "something went wrong" });
     logger.error("server error", {
