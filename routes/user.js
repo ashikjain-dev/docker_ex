@@ -57,7 +57,7 @@ userRoutes.post("/signin", validateSignIn, async (req, res, next) => {
       .collection("users")
       .findOne({ email: encryptedEmail });
     if (!userInfo) {
-      res.status(400).json({ data: "user data not found" });
+      res.status(403).json({ data: "user data not found" });
       logger.info("user data not found in the mongodb", {
         email: email,
       });
@@ -75,6 +75,11 @@ userRoutes.post("/signin", validateSignIn, async (req, res, next) => {
     userInfo.firstName = decrypt(userInfo.firstName);
     userInfo.lastName = decrypt(userInfo.lastName);
     userInfo.age = decrypt(userInfo.age);
+    const payload = { id: userInfo._id };
+    const token = jsonwebtoken.sign(payload, jsonSecretkey, {
+      expiresIn: "15m",
+    });
+    res.cookie("token", token, { maxAge: 1000 * 60 * 15 });
     res.json({
       data: {
         id: userInfo._id,
