@@ -1,5 +1,6 @@
 const express = require("express");
 const { rateLimit } = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const { userRoutes } = require("./routes/user");
 const { logger } = require("./logger");
@@ -15,6 +16,7 @@ const basicLimiter = rateLimit({
 const app = express();
 app.use(basicLimiter);
 app.use(express.json());
+app.use(cookieParser());
 app.use((req, res, next) => {
   logger.http("request recived", {
     url: req.originalUrl,
