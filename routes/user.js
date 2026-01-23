@@ -105,10 +105,24 @@ userRoutes.post("/signup", validateSignUp, async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, age } = req.body;
     const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const encryptedEmail = encrypt(email);
     const db = await getDB();
+    const resFromUserCollection = await db
+      .collection("users")
+      .findOne({ email: encryptedEmail });
+    if (resFromUserCollection) {
+      res.status(400).json({
+        data: "Your email is already there in our system, please signin by using your email and password.",
+      });
+      logger.info("user is already there in our db", {
+        email: email,
+        info: resFromUserCollection,
+      });
+      return;
+    }
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const resFromDB = await db.collection("users").insertOne({
-      email: encrypt(email),
+      email: encryptedEmail,
       password: hashedPassword,
       firstName: encrypt(firstName),
       lastName: encrypt(lastName),
