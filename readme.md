@@ -1,16 +1,16 @@
-# A basic nodejs project by using Express , Mongodb.
+# A basic nodejs project by using Express and Mongodb.
 
 - Connect with Mongodb
 - create two collections
-- users collection and data collection
+- users collection and articles collection
 - use authentication method and jsonweb token for securely storing data and for authentication purpose.
 - Mongodb is create by using docker.
 - Winston logger to log and store the log data in logs folder.
 
-# User collection consists of:
+# Users collection consists of:
 
 - Email,password(hashed),firstname,lastname and age.(all encrypted.)
 
-# Data collection consists of:
+# articles collection consists of:
 
-- title,description,created at and tags.
+- title,description,userId,created at and tags.

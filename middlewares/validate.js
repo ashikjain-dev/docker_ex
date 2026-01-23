@@ -93,5 +93,59 @@ const validateSignUp = (req, res, next) => {
     });
   }
 };
-
-module.exports = { validateSignIn, validateSignUp };
+/**
+ * validate article information
+ * it must contain article title(less than 20 characters),description,tags(optional)
+ */
+const validateArticle = (req, res, next) => {
+  try {
+    if (!req.body) {
+      res.status(400).json({
+        data: "please send the request body in the json format",
+      });
+      return;
+    }
+    let { title, description, tags } = req.body;
+    if (!title || !description) {
+      res.status(400).json({
+        data: "mandatory fields are: title and description.",
+      });
+      return;
+    }
+    title = validator.trim(title);
+    if (validator.isEmpty(title) || String(title).length > 50) {
+      res.status(400).json({
+        data: "Title of the article must contain atleast 1 character and upto 50 characters",
+      });
+      return;
+    }
+    description = validator.trim(description);
+    if (validator.isEmpty(description) || String(description).length > 200) {
+      res.status(400).json({
+        data: "Description of the article must contain atleast 1 character and upto 200 characters",
+      });
+      return;
+    }
+    req.body.title = title;
+    req.body.description = description;
+    if (!tags) {
+      req.body.tags = "";
+    }
+    if (req.body.tags !== "") {
+      req.body.tags = validator.trim(req.body.tags);
+      req.body.tags = req.body.tags.split(",");
+    } else {
+      req.body.tags = [];
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ data: "something went wrong" });
+    logger.http("server error", {
+      statusCode: res.statusCode,
+      error: error.message,
+      method: req.method,
+      url: req.originalUrl,
+    });
+  }
+};
+module.exports = { validateSignIn, validateSignUp, validateArticle };

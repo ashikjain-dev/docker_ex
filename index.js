@@ -2,7 +2,7 @@ const express = require("express");
 const { rateLimit } = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
-const { userRoutes } = require("./routes/user");
+const { userRoutes, articleRoutes } = require("./routes/");
 const { logger } = require("./logger");
 const { connectDB } = require("./config/mongo");
 const { error } = require("winston");
@@ -26,6 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/articles", articleRoutes);
 app.get("/", (req, res, next) => {
   res.json({ data: "ok" });
 });
